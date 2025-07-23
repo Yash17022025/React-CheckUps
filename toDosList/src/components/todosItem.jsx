@@ -1,38 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { toggleComplete, setEditingTodo } from '../features/todosSlice'
-import DeleteModal from '../modals/deleteButtonModal'
-import { useState } from 'react';
+import { toggleComplete, deleteTodo, editTodo } from '../features/todosSlice';
 
-const TodoItem = ({ todo, isEditing }) => {
+const TodoItem = ({ todo }) => {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(todo.text);
 
   const handleEdit = () => {
-        if (!isEditing) {
-      dispatch(setEditingTodo(todo));
+    if (isEditing){
+      dispatch(editTodo({ id: todo.id, newText }));
     }
+    setIsEditing(!isEditing);
   };
 
-    return (
-        <>
+  return (
     <li>
       <input
         type="checkbox"
         checked={todo.completed}
         onChange={() => dispatch(toggleComplete(todo.id))}
-        disabled={isEditing}
       />
-      <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-        {todo.text}
-      </span>
-      <button onClick={handleEdit} disabled={isEditing} >Edit</button>
-      <button onClick={() => setOpen(true)} disabled={isEditing}>Delete</button>
+      {isEditing ? (
+        <input
+          type="text"
+          value={newText}
+          onChange={(e) => setNewText(e.target.value)}
+        />
+      ) : (
+        <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+          {todo.text}
+        </span>
+      )}
+      <button onClick={handleEdit}>{isEditing ? 'Save' : 'Edit'}</button>
+      <button onClick={() => dispatch(deleteTodo(todo.id))}>Delete</button>
     </li>
-
-    <DeleteModal todo={todo} open={open} setOpen={setOpen}/>
-    </>
   );
 };
 
-export default TodoItem;
+export default TodoItem
